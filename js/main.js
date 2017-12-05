@@ -15,10 +15,11 @@
 		color: '#fff',
 		fontSize: '30px',
 		time: '5',
-		delay:400,
+		delay:300,
 		text: '这是一条弹幕。'
 	};
 	
+	/*获取用户弹幕配置*/
 	function getBullet() {
 		return {
 			fontSize: $('[name="f_size"]').val(),
@@ -28,57 +29,112 @@
 		}
 	}
 	
-	/*防重叠*/
+	/**
+	* @description 防重叠 推荐下一次放置位置
+	* @param len {Number} 存放数量
+	* */
 	function _NextPos (len) {
+		var _this = this;
+		
+		// 弹幕id位置，信息
 		this.itemPos = {};
+		
+		//弹幕索引位置
 		this.box = new Array(len);
+		
+		
+		/**
+		 * @description 获取空隙最大的那条弹幕
+		 * @param itemPos {Object} 弹幕,id,位置，信息
+		 * */
+		function getMinNum (itemPos) {
+			var _arrIdx = [];
+			var _arrRight = [];
+			var _id;
+			for (_id in itemPos){
+				var _index = itemPos[_id].index;
+				if(_arrIdx.indexOf(_index) > -1){
+					_this.box[_index] = _id;
+					_arrIdx[_arrIdx.indexOf(_index)] = _index;
+					_arrRight[_arrIdx.indexOf(_index)] = itemPos[_id].right;
+				} else {
+					_arrIdx.push(itemPos[_id].index);
+					_arrRight.push(itemPos[_id].right);
+				}
+			}
+			
+			var _min = Math.min.apply(null,_arrRight);
+			if (_min + 6 > $(win).width()){
+				return false;
+			}
+			return _arrIdx[_arrRight.indexOf(_min)]
+		}
 		
 		/*获取空位索引值*/
 		this.getIndex = function () {
 			var filtered = [];
-			$.each(this.box,function (i,item) {
+			var _box = this.box;
+			
+			// 计算空位
+			var _this = this;
+			$.each(_box,function (i,item) {
 				if (item === undefined){
 					filtered.push(i)
 				} else {
 					var _item = $('[data-id=' + item + ']');
-					console.log(_item.get(0).getBoundingClientRect())
-					var offset = _item.offset();
-					var itemOffset = {
-						top:parseInt(offset.top),
-						left:parseInt(offset.left),
-						width:_item.width(),
-						height:_item.height()
+					if(_item.length > 0){
+						var _rect = _item.get(0).getBoundingClientRect();
+						_this.itemPos[item].right = parseInt(_rect.right);
 					}
-					// console.log('itemOffset',itemOffset)
 				}
-			})
-			console.log(filtered)
-			return (filtered.length > 0) ? filtered[0] : false;
-		}
+			});
+			
+			var filteredLen = filtered.length;
+			var _ranIndex = parseInt(filteredLen * Math.random());
+			var _minMumId = getMinNum(_this.itemPos);
+			
+			// console.log('_minMumId',_minMumId)
+			
+			//空位优先
+			if (filteredLen > 0) {
+				return filtered[_ranIndex]
+			}
+			//没有空位获取空间最大的位置
+			else if (_minMumId !== false) {
+				return _minMumId
+			} else {
+				return false;
+			}
+		};
 		
-		// 添加一条弹幕记录
-		this.add = function (id,pos) {
-			pos.index = this.getIndex()
-			if (pos.index !== false) {
-				this.itemPos[id] = pos;
-				this.box[pos.index] = id;
-				console.log('添加成功');
-				return pos;
+		/**
+		 * @description 添加一条弹幕记录
+		 * @param id {String} 弹幕id
+		 * */
+		this.add = function (id) {
+			var _index = this.getIndex();
+			if (_index !== false) {
+				this.itemPos[id] = {};
+				this.itemPos[id].index = _index;
+				this.box[_index] = id;
+				return this.itemPos[id];
 			}else{
 				return false;
 			}
-		}
+		};
 		
-		// 弹幕消失删除记录
+		/**
+		 * @description 弹幕消失删除记录
+		 * @param id {String} 弹幕id
+		 * */
 		this.del = function (id) {
 			if(this.itemPos[id]){
 				delete this.itemPos[id];
 				this.box = this.box.map(function (value) {
 					return value === id ? undefined : value
-				})
-				console.log(id + ': 已移除')
+				});
 			}
-		}
+		};
 	}
 	
 	
@@ -88,30 +144,40 @@
 		var _this = this;
 		 var _item = $.extend({},this._opts.config,item);
 		 var $item = $(tmpl(this._opts.itemTpl, [_item]));
-		var _ran = parseInt(Math.random() * this.maxLen);
 		 var _size = this._size;
 		 var _time = parseInt(_item.time);
-		this.$el.find('.J_bulList').append($item);
-		var _date = new Date().getTime();
-		var _pos = _this.nextPos.add(_date,{
-			w: $item.width(),
-			h:$item.height()
-		})
-		$item.attr('data-id',_date)
+		var _date = new Date().getTime() + '';
+		var _pos = _this.nextPos.add(_date);
+		var _loopAdd = null;
 		
-		// console.log('_pos',_pos);
 		
-		 
+		function _call (_pos) {
+			_this.$el.find('.J_bulList').append($item);
+			$item.attr('data-id',_date);
+			$item.css({
+				'top':  _pos.index * 45 + 'px',
+				'transform': 'translate(-' + (_size.width + $item.outerWidth()) + 'px)',
+				'transition': 'transform ' +( _time + 's') +' linear'
+			});
+			setTimeout(function () {
+				$item.remove();
+				_this.nextPos.del(_date);
+			}, _time * 1000);
+		}
 		
-		$item.css({
-			'top':  (_pos ? _pos.index : _ran) * 45 + 'px',
-			'transform': 'translate(-' + (_size.width + $item.outerWidth()) + 'px)',
-			'transition': 'transform ' +( _time + 's') +' linear'
-		});
-		setTimeout(function () {
-			$item.remove();
-			_this.nextPos.del(_date);
-		}, _time * 1000);
+		/*添加不成功*/
+		if (_pos === false) {
+			clearInterval(_loopAdd);
+			_loopAdd = setInterval(function () {
+				_pos = _this.nextPos.add(_date);
+				if (_pos) {
+					clearInterval(_loopAdd);
+					_call(_pos);
+				}
+			},100);
+		} else {
+			_call(_pos)
+		}
 	}
 	
 	/*添加弹幕*/
@@ -154,9 +220,6 @@
 		};
 		this.maxLen = parseInt(this._size.height * 0.7 / 45);
 		this.nextPos = new _NextPos(this.maxLen);
-		// console.log('nextPos',this.nextPos);
-		
-		// this.$el.append(tmpl(opts.tpl, []));
 		addBul.call(this,data);
 		return this
 	};
