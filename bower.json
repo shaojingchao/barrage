@@ -1,0 +1,24 @@
+{
+  "name": "jiaocaibang",
+  "homepage": "https://github.com/shaojingchao/jiaocaibang",
+  "authors": [
+    "shaojingchao <1247537710@qq.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "artTemplate": "art-template#^4.12.1",
+    "es6-promise-polyfill": "^1.2.0",
+    "JavaScript-Templates": "blueimp/JavaScript-Templates#^3.11.0",
+    "jquery": "2.1.4"
+  }
+}

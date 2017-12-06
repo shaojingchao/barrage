@@ -96,8 +96,8 @@
 </script>
 
 <!--bullet 模板-end-->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-JavaScript-Templates/3.11.0/js/tmpl.js"></script>
-<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="bower_components/JavaScript-Templates/js/tmpl.min.js"></script>
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
 <script src="js/main-min.js"></script>
 <script>
 	(function (win) {
@@ -114,7 +114,7 @@
 
 
 		/*用户头像*/
-		win.Avatar = [
+		var Avatar = [
 			'icox01.png',
 			'icox02.png',
 			'icox03.png',
@@ -144,7 +144,6 @@
 		/*获取数据*/
 		var getDefaults = function (cb) {
 			$.get(url + 'action=search', function (data) {
-				console.log(data)
 				cb(data)
 			}, 'json')
 		};
