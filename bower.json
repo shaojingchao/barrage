@@ -19,6 +19,7 @@
     "artTemplate": "art-template#^4.12.1",
     "es6-promise-polyfill": "^1.2.0",
     "JavaScript-Templates": "blueimp/JavaScript-Templates#^3.11.0",
-    "jquery": "2.1.4"
+    "jquery": "2.1.4",
+    "prefixfree": "LeaVerou/prefixfree#^1.0.10"
   }
 }

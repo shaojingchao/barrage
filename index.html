@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="renderer" content="webkit">
   <title>教材帮弹幕开启啦</title>
   <link rel="stylesheet" href="css/txjy_base.css">
@@ -96,9 +96,11 @@
 </script>
 
 <!--bullet 模板-end-->
+<script src="js/modernizr-custom.js"></script>
 <script src="bower_components/JavaScript-Templates/js/tmpl.min.js"></script>
 <script src="bower_components/jquery/dist/jquery.min.js"></script>
-<script src="js/main.min.js"></script>
+<script src="bower_components/prefixfree/prefixfree.min.js"></script>
+<script src="js/main.js"></script>
 <script>
 	(function (win) {
 
@@ -206,7 +208,7 @@
 		});
 
 		/*点赞*/
-		$(document).on('click', '.J_bulList li', function () {
+		$('.J_bulList').on('click', 'li', function () {
 			var $this = $(this);
 			$.post(url + 'action=click&id=' + $(this).data('lid'), function (data) {
 				if (data.code === '1') {
